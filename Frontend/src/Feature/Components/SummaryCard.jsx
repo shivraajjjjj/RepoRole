@@ -26,9 +26,11 @@ export default function SummaryCard({ title, value }) {
         <span
           className={`
             text-[10px] font-mono font-bold px-2 py-0.5 rounded-md
-            ${count > 0
-              ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-              : "bg-slate-800 text-slate-600 border border-slate-700"}
+            ${
+              count > 0
+                ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                : "bg-slate-800 text-slate-600 border border-slate-700"
+            }
           `}
         >
           {count}
