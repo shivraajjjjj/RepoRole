@@ -4,7 +4,8 @@
   "description": "The Backend directory contains all the server-side code and resources for the application. Below is an overview of its structure:",
   "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev":"npx tsx watch src/server.js "
   },
   "keywords": [],
   "author": "",
