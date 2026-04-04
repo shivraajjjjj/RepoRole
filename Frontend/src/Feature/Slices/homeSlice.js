@@ -6,7 +6,8 @@ export const homeSlice = createSlice({
         repoData: null,
         error: null,
         loading: false,
-        page: 'result'
+        page: 'result',
+        theme: localStorage.getItem("theme") || "dark"
     },
     reducers: {
         setData: (state, action) => {
@@ -23,9 +24,12 @@ export const homeSlice = createSlice({
             state.error = null;
             state.repoData = null;
         },
+        setTheme: (state, action) => {
+            state.theme = action.payload
+        }
     }
 })
 
-export const {setData,setError,setLoading,resetFlow}=homeSlice.actions
+export const { setData, setTheme, setError, setLoading, resetFlow } = homeSlice.actions
 
 export default homeSlice.reducer

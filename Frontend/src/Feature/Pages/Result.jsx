@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+
 export default function Results({ data, onBack, onAnalyzeAgain }) {
   const {
     repo = {},
@@ -11,9 +13,11 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
     roles = [],
     metadata = {},
   } = data;
-  console.log("Result Data:", data);
+  const {theme}=useSelector((state)=>state.repo)
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-930 to-gray-900 text-gray-100">
+    <div
+      className={`min-h-screen bg-gradient-to-b ${theme=='dark'?"from-gray-950 via-gray-930 to-gray-900 text-gray-100":"from-blue-300 via-gray-200 to-indigo-500"}`}
+    >
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
         <header className="flex items-center justify-between gap-4">
           <div>
@@ -40,8 +44,15 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
         <section className="grid gap-4 md:grid-cols-2">
           <InfoCard title="Repository">
             <div className="space-y-1 text-sm">
-              <div className="text-gray-400">{repo.owner}/{repo.name}</div>
-              <a className="text-blue-300 hover:underline" href={repo.url} target="_blank" rel="noreferrer">
+              <div className="text-gray-400">
+                {repo.owner}/{repo.name}
+              </div>
+              <a
+                className="text-blue-300 hover:underline"
+                href={repo.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {repo.url}
               </a>
               {metadata?.isToy && (
@@ -56,7 +67,7 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
             <PillList items={structure} emptyLabel="No folders detected" />
           </InfoCard>
         </section>
-         {/* Roles */}
+        {/* Roles */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Role Matches</h2>
@@ -68,7 +79,7 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
             </div>
           )}
           <div className="grid gap-4 md:grid-cols-2">
-            {roles.map(role => (
+            {roles.map((role) => (
               <RoleCard key={role.title || role.role} role={role} />
             ))}
           </div>
@@ -113,7 +124,10 @@ function PillList({ items, emptyLabel }) {
   return (
     <div className="flex flex-wrap gap-2 text-sm">
       {items.map((item, i) => (
-        <span key={i} className="px-2 py-1 rounded-full bg-gray-800 border border-gray-700">
+        <span
+          key={i}
+          className="px-2 py-1 rounded-full bg-gray-800 border border-gray-700"
+        >
           {item}
         </span>
       ))}
@@ -131,7 +145,9 @@ function RoleCard({ role }) {
     <div className="p-5 rounded-xl bg-gray-900/70 border border-gray-800 space-y-3 shadow-lg shadow-black/30">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold">{role.title || role.role || "Role"}</h3>
+          <h3 className="text-lg font-semibold">
+            {role.title || role.role || "Role"}
+          </h3>
           <div className="text-sm text-gray-400">Raw score: {rawScore}</div>
         </div>
         <span className="px-2 py-1 rounded-full text-xs bg-gray-800 border border-gray-700">
@@ -147,7 +163,9 @@ function RoleCard({ role }) {
           <div className="font-semibold text-gray-200">Why this role?</div>
           <ul className="list-disc list-inside space-y-1">
             {matched.map((s, i) => (
-              <li key={i}>{s.signal} (+{s.points})</li>
+              <li key={i}>
+                {s.signal} (+{s.points})
+              </li>
             ))}
           </ul>
         </div>
