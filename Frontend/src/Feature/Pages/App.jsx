@@ -1,78 +1,8 @@
 import { useRepo } from "../Hooks/useRepo";
 import Results from "../Components/Results";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setTheme } from "../Slices/homeSlice";
-
-function CursorBubble({ theme }) {
-  const canvasRef = useRef(null);
-  const bubbles = useRef([]);
-  const animRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const onMove = (e) => {
-      for (let i = 0; i < 2; i++) {
-        bubbles.current.push({
-          x: e.clientX,
-          y: e.clientY,
-          r: 4 + Math.random() * 10,
-          life: 1,
-          decay: 0.02,
-        });
-      }
-    };
-
-    window.addEventListener("mousemove", onMove);
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      bubbles.current = bubbles.current.filter((b) => b.life > 0);
-
-      for (const b of bubbles.current) {
-        b.y -= 1;
-        b.life -= b.decay;
-
-        const color =
-          theme === "dark"
-            ? `rgba(245,158,11,${b.life})`
-            : `rgba(59,130,246,${b.life})`;
-
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-      }
-
-      animRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(animRef.current);
-    };
-  }, [theme]);
-
-  return (
-    <canvas
-      className="fixed inset-0 pointer-events-none z-50"
-      ref={canvasRef}
-    />
-  );
-}
 
 export default function App() {
   const { repoData, loading, error, page, analyzeRepo, resetFlow } = useRepo();
@@ -93,7 +23,6 @@ export default function App() {
 
   return (
     <>
-      <CursorBubble theme={theme} />
       <div
         className={`min-h-screen flex flex-col items-center justify-center px-4 transition-all duration-700
         ${

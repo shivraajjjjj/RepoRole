@@ -4,6 +4,7 @@ import {
   setData,
   setError,
   setLoading,
+  setPage,
   resetFlow,
 } from "../Slices/homeSlice";
 
@@ -15,6 +16,7 @@ export const useRepo = () => {
       dispatch(setLoading(true));
       const data = await GetResults({ repoUrl });
       dispatch(setData(data));
+      dispatch(setPage("result"));
       dispatch(setError(null));
     } catch (err) {
       dispatch(

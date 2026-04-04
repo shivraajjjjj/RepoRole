@@ -19,6 +19,9 @@ export const homeSlice = createSlice({
         setLoading: (state, action) => {
             state.loading = action.payload
         },
+        setPage: (state, action) => {
+            state.page = action.payload
+        },
         resetFlow: (state) => {
             state.page = "landing";
             state.error = null;
@@ -30,6 +33,6 @@ export const homeSlice = createSlice({
     }
 })
 
-export const { setData, setTheme, setError, setLoading, resetFlow } = homeSlice.actions
+export const { setData, setTheme, setError, setLoading, setPage, resetFlow } = homeSlice.actions
 
 export default homeSlice.reducer
