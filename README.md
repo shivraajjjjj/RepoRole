@@ -4,6 +4,13 @@ RepoSense analyzes a GitHub repository and intelligently predicts the most suita
 No resumes.
 No forms.
 Just code → roles.
+## Live Links
+
+- **Live Demo**: [Try it Now](#) *https://reposense.vercel.app/*
+
+## Backend API Link
+
+- **API Base URL**: *https://reposense.onrender.com*
 ## Problem Statement
 
 Developers struggle to articulate their skills without manually analyzing their repositories. Teams need a scalable way to assess repository patterns against specific role requirements. RepoSense automates this by inspecting a public GitHub repository's structure, manifests, and signals to infer aligned developer roles.
@@ -110,7 +117,7 @@ JobEngine/
 cd Backend
 npm install
 # Create .env with GITHUB_TOKEN and other configs
-npm run dev  # or node src/server.js
+node src/server.js
 ```
 
 ### Frontend
