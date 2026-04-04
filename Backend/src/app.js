@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 
 app.use('/analyze', algoRoutes);
 
-// Global error handler (must be last middleware)
+// Global error handler 
 app.use(errorHandler);
 
 export default app;

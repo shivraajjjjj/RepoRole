@@ -1,0 +1,156 @@
+
+for each roleConfig:
+    rawScore = 0
+    matchedSignals = []
+
+    rawScore += scoreLanguages()
+    rawScore += scoreRuntime()
+    rawScore += scoreFrameworks()
+    rawScore += scoreStructure()
+    rawScore += scoreDatabase()
+    rawScore += scoreBuild()
+    rawScore += scoreDependencies()
+    rawScore += scoreInfra()
+
+    rawScore -= applyPenalties()
+
+    rawScore = clamp(rawScore, 0, RAW_MAX)
+
+    finalScore = normalize(rawScore, RAW_MAX)
+
+    if finalScore >= MIN_THRESHOLD:
+        add to results
+
+sort results by finalScore desc
+return top 4–5
+
+2️⃣ Generic Scoring Function Pattern
+
+This is the key abstraction.
+
+function scoreCategory(categoryConfig, detectedSignals):
+    score = 0
+
+    for each signal in categoryConfig:
+        if detectedSignals contains signal:
+            score += categoryConfig[signal]
+
+    return min(score, categoryConfig.cap)
+
+🟦 Languages
+scoreLanguages():
+    return scoreCategory(
+        role.weights.languages,
+        repo.languages
+    )
+
+
+
+🟦 Runtime (if exists)
+scoreRuntime():
+    if role.weights.runtime exists:
+        return scoreCategory(
+            role.weights.runtime,
+            repo.runtime
+        )
+    return 0
+
+
+🟦 Frameworks (core + optional)
+scoreFrameworks():
+    score = 0
+
+    if role.weights.frameworks.core exists:
+        score += scoreCategory(
+            role.weights.frameworks.core,
+            repo.frameworks
+        )
+
+    if role.weights.frameworks.optional exists:
+        score += scoreCategory(
+            role.weights.frameworks.optional,
+            repo.frameworks
+        )
+
+    return min(score, role.weights.frameworks.cap)
+
+
+🟦 Structure
+scoreStructure():
+    return scoreCategory(
+        role.weights.structure,
+        repo.folders
+    )
+
+
+🟦 Database / Persistence
+scoreDatabase():
+    if repo.databases.count >= 1:
+        score = role.weights.database.any
+
+    if repo.databases.count > 1:
+        score = role.weights.database.multiple
+
+    return min(score, role.weights.database.cap)
+
+🟦 Build / Dependencies (role-specific)
+scoreBuildOrDeps():
+    if role.weights.build exists:
+        return scoreCategory(
+            role.weights.build,
+            repo.buildFiles
+        )
+
+    if role.weights.dependencies exists:
+        return scoreCategory(
+            role.weights.dependencies,
+            repo.dependencyFiles
+        )
+
+    return 0
+
+🟦 Infra / Quality
+scoreInfra():
+    return scoreCategory(
+        role.weights.infra,
+        repo.infraSignals
+    )
+
+
+4️⃣ Penalty Engine (IMPORTANT)
+applyPenalties():
+    penalty = 0
+
+    if repo.isTutorial:
+        penalty += tutorialPenaltyScore   // computed separately
+
+    return min(penalty, role.weights.penalties.tutorial_max)
+
+
+5️⃣ Normalization (LOCKED)
+normalize(rawScore, RAW_MAX):
+    return round((rawScore / RAW_MAX) * 100)
+
+
+Also:
+
+finalScore = clamp(finalScore, 0, 100)
+
+
+6️⃣ Role Filtering & Ranking
+MIN_THRESHOLD = 30
+
+results = results.filter(role => role.finalScore >= MIN_THRESHOLD)
+results.sort(descending finalScore)
+
+return results.slice(0, 5)
+
+7️⃣ Matched Signals (Explainability)
+
+Every time you add score:
+
+matchedSignals.push({
+    category: "framework",
+    signal: "Express",
+    points: 12
+})

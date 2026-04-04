@@ -3,7 +3,7 @@ import { ALL_ROLES } from "../roles/index.js";
 
 const MAX_RESULTS = 3;
 
-/**
+/*
  * Score a repository against all role configurations
  * @param {string} repoUrl - GitHub repository URL
  * @returns {Promise<Array>} - Sorted array of role matches with scores
