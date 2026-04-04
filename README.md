@@ -8,6 +8,14 @@ Just code → roles.
 
 Developers struggle to articulate their skills without manually analyzing their repositories. Teams need a scalable way to assess repository patterns against specific role requirements. RepoSense automates this by inspecting a public GitHub repository's structure, manifests, and signals to infer aligned developer roles.
 
+## Live Links
+
+- **Live Demo**: [Try it Now](#) *https://reposense.vercel.app/*
+
+## Backend API Link
+
+- **API Base URL**: *https://reposense.onrender.com*
+
 ## How It Works
 
 1. **Input**: User provides a GitHub repository URL
