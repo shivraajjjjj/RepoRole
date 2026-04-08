@@ -1,144 +1,169 @@
 # RepoSense - Repository to Role Analyzer
-RepoSense analyzes a GitHub repository and intelligently predicts the most suitable job/internship roles based on real technical signals .
+
+RepoSense analyzes a GitHub repository and predicts suitable job and internship roles from real technical signals.
 
 No resumes.
 No forms.
 Just code → roles.
 ## Live Links
 
-- **Live Demo**: [Try it Now](#) *https://reposense.vercel.app/*
-
-## Backend API Link
-
-- **API Base URL**: *https://reposense.onrender.com*
-## Problem Statement
-
-Developers struggle to articulate their skills without manually analyzing their repositories. Teams need a scalable way to assess repository patterns against specific role requirements. RepoSense automates this by inspecting a public GitHub repository's structure, manifests, and signals to infer aligned developer roles.
-
-## Live Links
-
-- **Live Demo**: [Try it Now](#) *https://reposense.vercel.app/*
-
-## Backend API Link
-
-- **API Base URL**: *https://reposense.onrender.com*
+- Live Demo: https://reposense.vercel.app/
+- Backend API: https://reposense.onrender.com
 
 ## How It Works
 
-1. **Input**: User provides a GitHub repository URL
-2. **Analysis**: Backend fetches repo metadata, languages, folder structure, and manifest files (package.json, pom.xml, requirements.txt, etc.)
-3. **Signal Extraction**: Parses manifests to extract runtime, frameworks, databases, and build tools
-4. **Scoring**: Matches detected signals against predefined role configurations
-5. **Output**: Returns ranked roles with raw scores, final scores, and confidence metrics
+1. User submits a GitHub repository URL.
+2. Backend fetches repository metadata, languages, and folder contents.
+3. Manifest files are scanned and signals are extracted.
+4. Signals are scored against role weight configurations.
+5. Top role matches are returned with score and confidence.
 
 ## Key Features
 
-- **Role Detection**: Automatically identifies suitable roles (Frontend React Dev, Backend Java Dev, Full Stack JS Dev, ML Engineer, etc.)
-- **Signal-Based Scoring**: Matches languages, frameworks, databases, and project structure against role requirements
-- **Confidence Metrics**: Factors in coverage, strength, and penalties (toy projects, weak structure) to compute confidence
-- **Repository Metadata**: Displays repo structure, detected languages, frameworks, databases, and build tools
-- **Monorepo Detection**: Identifies and reports multi-manifest projects
-- **Toy Project Detection**: Flags repositories that appear to be learning projects
-- **Caching**: Reduces redundant GitHub API calls for recently analyzed repos
+- Role detection for frontend, backend, fullstack, and ML profiles
+- Signal-based scoring from languages, frameworks, databases, and structure
+- Confidence scoring with toy project and weak-structure effects
+- Monorepo detection for V1 safety checks
+- Redis-based caching for GitHub API calls
 
 ## Tech Stack
 
 ### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **API**: GitHub REST API
-- **Database**: PostgreSQL (optional, for caching)
-- **Packages**: axios, express-validator, dotenv
+
+- Node.js with Express 5
+- Axios
+- Redis
+- dotenv
 
 ### Frontend
-- **Framework**: React 19
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **HTTP Client**: Axios
-- **UI**: Custom components with dark theme
 
-## Project Structure
+- React 19
+- Redux Toolkit
+- Vite 7
+- Tailwind CSS 4
+- Axios
 
-```
+## Project Structure 
+
+```text
 JobEngine/
+├── README.md
+├── LICENSE
 ├── Backend/
-│   ├── src/
-│   │   ├── app.js                    # Express app setup with CORS
-│   │   ├── server.js                 # HTTP server entry
-│   │   ├── config/
-│   │   │   └── env.js               # Environment config (GitHub token, API base URL)
-│   │   ├── controllers/
-│   │   │   └── analyze.controller.js # Request handler & error management
-│   │   ├── routes/
-│   │   │   └── analyze.routes.js    # POST /analyze/your-roles endpoint
-│   │   ├── services/
-│   │   │   ├── analyze.service.js   # Core analysis logic
-│   │   │   ├── github.service.js    # GitHub API client (direct fetch, no cache)
-│   │   │   ├── signal.service.js    # Signal extraction from manifests
-│   │   │   ├── scanner.service.js   # Manifest file scanning
-│   │   │   └── toyDetector.js       # Toy project detection
-│   │   ├── engines/
-│   │   │   └── scoring.engine.js    # Role scoring & confidence calculation
-│   │   ├── roles/
-│   │   │   ├── index.js             # All role configurations
-│   │   │   ├── backendJavaDev.js
-│   │   │   ├── backendJsDev.js
-│   │   │   ├── frontendReactDev.js
-│   │   │   ├── fullstackJavaDev.js
-│   │   │   ├── fullstackJsDev.js
-│   │   │   └── mlEngineer.js
-│   │   ├── utils/
-│   │   │   └── parser.js            # GitHub URL parser
+│   ├── jobs.js
 │   ├── package.json
-│   ├── .env.example                 # Environment template
-│   └── README.md
-├── Frontend/
-│   ├── src/
-│   │   ├── App.jsx                  # Landing page with input & analyze button
-│   │   ├── Result.jsx               # Results page with role cards & stack info
-│   │   ├── main.jsx                 # React entry point
-│   │   └── App.css
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── eslint.config.js
-│   └── README.md
-├── .gitignore                        # Git ignore rules (env, node_modules, db files, logs)
-├── README.md                         # Project documentation
-└── (project root)
+│   └── src/
+│       ├── app.js
+│       ├── server.js
+│       ├── cache/
+│       │   └── redis.js
+│       ├── config/
+│       │   ├── db.js
+│       │   └── env.js
+│       ├── controllers/
+│       │   └── analyze.controller.js
+│       ├── engines/
+│       │   └── scoring.engine.js
+│       ├── middlewares/
+│       │   └── errorHandler.js
+│       ├── orchestrators/
+│       │   └── analyze.orchestrators.js
+│       ├── roles/
+│       │   ├── backendJavaDev.js
+│       │   ├── backendJsDev.js
+│       │   ├── frontendReactDev.js
+│       │   ├── fullstackJavaDev.js
+│       │   ├── fullstackJsDev.js
+│       │   ├── index.js
+│       │   └── mlEngineer.js
+│       ├── routes/
+│       │   └── analyze.routes.js
+│       ├── services/
+│       │   ├── analyze.service.js
+│       │   ├── github.service.js
+│       │   ├── scanner.service.js
+│       │   ├── signal.service.js
+│       │   └── toyDetector.js
+│       └── utils/
+│           ├── cacheHelper.js
+│           └── parser.js
+└── Frontend/
+    ├── eslint.config.js
+    ├── index.css
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    ├── public/
+    └── src/
+        ├── main.jsx
+        ├── App/
+        │   ├── App.css
+        │   └── app.store.js
+        ├── assets/
+        └── Feature/
+            ├── Components/
+            ├── Hooks/
+            ├── Pages/
+            ├── Services/
+            ├── Slices/
+            └── utils/
 ```
 
-**Note**: Database files (`db.js`, `cache.service.js`, `cacheKey.js`) have been removed. The app fetches directly from GitHub API without caching. Database-related env variables are not required.
-
-## Setup & Run
+## Setup and Run
 
 ### Backend
+
 ```bash
 cd Backend
 npm install
-# Create .env with GITHUB_TOKEN and other configs
+npm run dev
+```
+
+Alternative:
+
+```bash
 node src/server.js
 ```
 
 ### Frontend
+
 ```bash
 cd Frontend
 npm install
-npm run dev  # Vite dev server on http://localhost:5173
+npm run dev
+```
+
+## Environment Configuration (Updated)
+
+### Backend .env
+
+```env
+GITHUB_TOKEN=your_github_token
+GITHUB_API_BASE_URL=https://api.github.com
+REDIS_URL=redis://localhost:6379
+PORT=3000
+```
+
+### Frontend .env
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
 ```
 
 ## API Example
 
-**Endpoint**: `POST /analyze/your-roles`
+Endpoint: POST /analyze/your-roles
 
-**Request**:
+Request:
+
 ```json
 {
   "repo": "https://github.com/facebook/react"
 }
 ```
 
-**Response**:
+Success response:
+
 ```json
 {
   "supported": true,
@@ -148,82 +173,34 @@ npm run dev  # Vite dev server on http://localhost:5173
       "name": "react",
       "url": "https://github.com/facebook/react"
     },
-    "languages": ["JavaScript", "TypeScript"],
-    "runtime": ["node"],
+    "languages": ["JavaScript"],
+    "runtime": ["Node.js"],
     "frameworks": ["React"],
     "databases": [],
-    "buildFiles": ["package.json", "build.gradle"],
-    "structure": ["src", "tests", "docs"],
+    "buildFiles": ["package.json"],
+    "structure": ["src"],
     "flags": [],
-    "roles": [
-      {
-        "roleId": "frontend-react-dev",
-        "title": "Frontend React Developer",
-        "rawScore": "78/100",
-        "finalScore": 78,
-        "confidence": "21%",
-        "matchedSignals": [
-          { "category": "frameworks", "signal": "React", "points": 25 },
-          { "category": "languages", "signal": "JavaScript", "points": 10 }
-        ]
-      }
-    ],
-    "metadata": {
-      "isToy": false,
-      "hasReadme": true,
-      "isMonorepo": false,
-      "supported": true
-    }
+    "roles": []
   }
 }
 ```
 
-**Error Response**:
+Error response:
+
 ```json
 {
-  "supported": false,
-  "message": "Cannot reach GitHub API. Check your internet connection."
+  "error": "Repository not found",
+  "message": "Repository not found",
+  "supported": false
 }
 ```
 
-## Important Notes
+## Notes
 
-- **Public Repositories Only**: Analyzer requires public GitHub repos; private repos are not accessible without authentication
-- **Network Dependency**: Backend must have internet access to reach GitHub API
-- **GitHub Rate Limiting**: Each analysis consumes one GitHub API request; consider rate limits (60 req/hr unauthenticated, 5000 req/hr authenticated)
-- **Token Security**: Store `GITHUB_TOKEN` in `.env` securely; never commit to version control
-- **No Caching**: Every request fetches fresh data from GitHub API; no local cache or database storage
-- **No Database Required**: Database logic removed; app is stateless and requires only GitHub token
-- **Monorepo Limitation**: V1 does not support projects with multiple manifest files in different directories
-- **Role Accuracy**: Scores depend on manifest quality and project structure; toy projects are flagged with lower confidence
-
-## Configuration
-
-### Environment Variables (.env)
-```
-GITHUB_TOKEN=github_pat_xxxx...      # GitHub personal access token
-GITHUB_API_BASE_URL=https://api.github.com
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=password
-DB_NAME=algohire
-PORT=3000
-```
-
-## Future Improvements
-
-- **V2 Infrastructure Scoring**: Detect Docker, Kubernetes, cloud configs (AWS, Azure) for DevOps roles
-- **Multi-File Analysis**: Support monorepos with multiple manifests
-- **Real-time Caching**: Switch to Redis for distributed caching
-- **Private Repository Support**: OAuth flow for private repo access
-- **More Roles**: Add ML Ops, DevOps, Cloud Engineer, Data Engineer roles with refined weights
-- **Historical Tracking**: Store analysis history per user/team
-- **Webhook Integration**: Trigger analysis on GitHub push events
-- **Custom Role Definitions**: Allow teams to create custom role profiles
-- **Bulk Analysis**: Analyze multiple repos in one request
-- **Export Reports**: Generate PDF/CSV role summaries
+- Public GitHub repositories are supported in V1.
+- Monorepos with multiple manifest directories are not supported in V1.
+- Redis is required for cache-backed API calls.
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See LICENSE for full text.
