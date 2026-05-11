@@ -5,6 +5,7 @@ import RoleCard from "./RoleCard";
 import PillList from "./PillList";
 
 export default function Results({ data, onBack, onAnalyzeAgain }) {
+  const normalized = data?.projectSignals || data?.data || data?.result || data || {};
   const {
     repo = {},
     runtime = [],
@@ -16,7 +17,7 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
     flags = [],
     roles = [],
     metadata = {},
-  } = data;
+  } = normalized;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-gray-900 text-gray-100">
