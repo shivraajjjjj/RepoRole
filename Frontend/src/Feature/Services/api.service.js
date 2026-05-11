@@ -8,10 +8,41 @@ export const GetResults = async ({ repoUrl }) => {
     });
 
     const json = res.data;
+    const normalized = normalizeAnalysisResponse(json);
 
-    if (!json.supported) {
-        throw new Error(json.message || "Repository not supported");
+    if (normalized.metadata?.supported === false || normalized.supported === false) {
+        throw new Error(normalized.message || "Repository not supported");
     }
 
-    return json.projectSignals ? json.projectSignals : json;
+    return normalized;
 };
+
+function normalizeAnalysisResponse(payload) {
+    if (!payload || typeof payload !== "object") {
+        return {};
+    }
+
+    const candidate =
+        payload.projectSignals ||
+        payload.data ||
+        payload.result ||
+        payload.analysis ||
+        payload;
+
+    if (candidate.metadata && typeof candidate.metadata === "object") {
+        return candidate;
+    }
+
+    return {
+        ...candidate,
+        metadata: {
+            ...(candidate.metadata || {}),
+            supported:
+                candidate.metadata?.supported ??
+                candidate.supported ??
+                payload.metadata?.supported ??
+                payload.supported ??
+                true,
+        },
+    };
+}

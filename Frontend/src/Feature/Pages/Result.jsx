@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 
 export default function Results({ data, onBack, onAnalyzeAgain }) {
+  const normalized = data?.projectSignals || data?.data || data?.result || data || {};
   const {
     repo = {},
     runtime = [],
@@ -12,7 +13,7 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
     flags = [],
     roles = [],
     metadata = {},
-  } = data;
+  } = normalized;
   const {theme}=useSelector((state)=>state.repo)
   return (
     <div
@@ -56,7 +57,7 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
                 {repo.url}
               </a>
               {metadata?.isToy && (
-                <div className="text-amber-300">⚠️ Marked as toy project</div>
+                <div className="text-amber-300 text-xs">⚠️ Marked as toy project</div>
               )}
               {metadata?.isMonorepo && (
                 <div className="text-amber-300">⚠️ Monorepo detected</div>
@@ -67,7 +68,8 @@ export default function Results({ data, onBack, onAnalyzeAgain }) {
             <PillList items={structure} emptyLabel="No folders detected" />
           </InfoCard>
         </section>
-        {/* Roles */}
+
+        {/* Roles with sort controls */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Role Matches</h2>

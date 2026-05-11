@@ -21,7 +21,7 @@ export function detectToyProject(projectSignals) {
   // CRITICAL: high-signal override
   if (
     projectSignals.languages?.length >= 2 ||
-    projectSignals.projects?.frameworks?.length >= 1
+    projectSignals.frameworks?.length >= 1
   ) {
     toyScore -= 2;
   }

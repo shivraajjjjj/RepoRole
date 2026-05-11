@@ -1,4 +1,3 @@
-import { analyzeRepository } from "../services/analyze.service.js";
 import { ALL_ROLES } from "../roles/index.js";
 
 const MAX_RESULTS = 3;
@@ -38,7 +37,7 @@ export async function scoreRepository(projectSignals) {
         // Sort by score descending and return top matches
         results.sort((a, b) => b.finalScore - a.finalScore);
         if (results.length < 1) {
-            return ["No suitable role matches found for this repository."," Thank you for using our service."];
+            return [];
         }
         
         return results.slice(0, MAX_RESULTS);
@@ -247,14 +246,20 @@ function scoreBuildOrDeps(roleConfig, projectSignals, matchedSignals) {
     // Check for build tools (Java projects)
     if (roleConfig.weights.build) {
         const buildSignals = [];
+        const frameworks = projectSignals.frameworks || [];
+        const buildFiles = projectSignals.buildFiles || [];
         
         // Check for Maven/Gradle in project
-        if (projectSignals.projects?.path && 
-            (projectSignals.projects.runtime?.includes('Java') || projectSignals.projects.runtime?.includes('JVM'))) {
-            
-            // Simple heuristic: if we detected Java frameworks, likely has build tool
-            if (projectSignals.projects.frameworks?.some(f => 
-                f.includes('Spring') || f.includes('Micronaut') || f.includes('Quarkus'))) {
+        if (projectSignals.runtime?.includes('Java') || projectSignals.runtime?.includes('JVM')) {
+            const hasJavaBuildFile = buildFiles.includes('pom.xml') ||
+                buildFiles.includes('build.gradle') ||
+                buildFiles.includes('build.gradle.kts');
+
+            const hasJavaFramework = frameworks.some(f =>
+                f.includes('Spring') || f.includes('Micronaut') || f.includes('Quarkus')
+            );
+
+            if (hasJavaBuildFile || hasJavaFramework) {
                 buildSignals.push('maven_gradle');
             }
         }
@@ -274,7 +279,7 @@ function scoreBuildOrDeps(roleConfig, projectSignals, matchedSignals) {
         if (projectSignals.metadata?.hasReadme) {
             // Check what manifests were detected
             // This is a simplified heuristic
-            if (projectSignals.projects?.runtime?.includes('Python')) {
+            if (projectSignals.runtime?.includes('Python')) {
                 depSignals.push('requirements_txt'); // Assume if Python detected
             }
         }

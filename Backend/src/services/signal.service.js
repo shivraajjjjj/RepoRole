@@ -1,35 +1,34 @@
 // Mutates the provided projectSignals Set collections based on a manifest file
-export function extractSignals(manifest, projectSignals) {
-  switch (manifest.manifestName) {
-    case "package.json":
-      projectSignals.buildFiles?.add?.("package.json");
-      extractNodeSignals(manifest, projectSignals);
-      break;
+export function extractSignals(manifests, projectSignals) {
+  for (const manifest of manifests) {
+    switch (manifest.name) {
+      case "package.json":
+        projectSignals.buildFiles?.add?.("package.json");
+        extractNodeSignals(manifest, projectSignals);
+        break;
     case "requirements.txt":
     case "pyproject.toml":
-      projectSignals.buildFiles?.add?.(manifest.manifestName);
+      projectSignals.buildFiles?.add?.(manifest.name);
       extractPythonSignals(manifest, projectSignals);
       break;
     case "pom.xml":
     case "build.gradle":
     case "build.gradle.kts":
-      projectSignals.buildFiles?.add?.(manifest.manifestName);
-      extractJavaSignals(manifest, projectSignals);
+      projectSignals.buildFiles?.add?.(manifest.name);
+      extractJavaSignals(manifest.content, projectSignals);
       break;
     case "CMakeLists.txt":
       projectSignals.buildFiles?.add?.("CMakeLists.txt");
-      extractCppSignals(manifest, projectSignals);
+      extractCppSignals(manifest.content, projectSignals);
       break;
     default:
       break;
   }
 }
+}
 
 const extractNodeSignals = (item, projectSignals) => {
-  const pkg = JSON.parse(
-    Buffer.from(item.content, "base64").toString("utf-8")
-  );
-
+  const pkg = JSON.parse(Buffer.from(item.content, "base64").toString("utf-8"));
   projectSignals.runtime.add("Node.js");
 
   const deps = {
@@ -38,9 +37,11 @@ const extractNodeSignals = (item, projectSignals) => {
   };
 
   if (deps.react) projectSignals.frameworks.add("React");
-  if (deps.next) projectSignals.frameworks.add("Next.js");
+  if (deps.next) projectSignals.frameworks.add("NextJS");
   if (deps.express) projectSignals.frameworks.add("Express");
   if (deps["@nestjs/core"]) projectSignals.frameworks.add("NestJS");
+  if (deps.redux) projectSignals.frameworks.add("Redux");
+  if (deps["react-router-dom"] || deps["react-router"]) projectSignals.frameworks.add("React Router");
 
   if (deps.mongoose) projectSignals.databases.add("MongoDB");
   if (deps.pg) projectSignals.databases.add("PostgreSQL");

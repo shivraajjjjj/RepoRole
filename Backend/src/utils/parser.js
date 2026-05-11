@@ -2,7 +2,7 @@ export function parseRepoUrl(repoUrl) {
   try {
     const url = new URL(repoUrl);
 
-    if (url.hostname !== "github.com") {
+    if (url.hostname !== "github.com" && url.hostname !== "www.github.com") {
       throw new Error("Not a GitHub URL");
     }
 

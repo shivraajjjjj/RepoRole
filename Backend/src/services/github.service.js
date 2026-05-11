@@ -1,11 +1,18 @@
 import axios from 'axios';
 import { parseRepoUrl } from '../utils/parser.js';
+import {MANIFEST_FILES} from "./scanner.service.js";
 import { cachedFetch } from '../utils/cacheHelper.js';
 import '../config/env.js';
+
+const _rawBase = process.env.GITHUB_API_BASE_URL ?? '';
+const _rawToken = process.env.GITHUB_TOKEN ?? '';
+const GITHUB_API_BASE_URL = _rawBase.trim().replace(/^\"|\"$/g, '');
+const GITHUB_TOKEN = _rawToken.trim().replace(/^\"|\"$/g, '');
+
 export const githubClient = axios.create({
-    baseURL: process.env.GITHUB_API_BASE_URL,
+    baseURL: GITHUB_API_BASE_URL,
     headers: {
-        'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github+json'
     }
 });
@@ -19,91 +26,84 @@ const IMPORTANT_FILES = [
     "build.gradle.kts",
     "Dockerfile",
     "README.md",
-];
+]
+
 
 export async function fetchRepoData(repoUrl) {
 
     try {
-        if (!process.env.GITHUB_API_BASE_URL || !process.env.GITHUB_TOKEN) {
+        if (!GITHUB_API_BASE_URL || !GITHUB_TOKEN) {
             throw new Error('GitHub API configuration is missing');
         }
         const { owner, repo } = parseRepoUrl(repoUrl);
-        const [meta, languages, contents] = await Promise.all([
-            fatchRepoMeta(owner, repo),
-            fatchRepoLanguages(owner, repo),
-            fatchRepoContents(owner, repo)
+        const [meta, languages, structure] = await Promise.all([
+            fetchRepoMeta(owner, repo),
+            fetchRepoLanguages(owner, repo),
+            fetchRepoStructure(owner, repo)
         ]);
-        const files = await fetchImpotentFiles(owner, repo, contents);
+
+        const files = await fetchImportantFiles(structure);
 
 
         const result = {
             meta,
             languages,
-            contents,
+            structure,
             files
         };
 
         return result;
     } catch (err) {
         if (err.response && err.response.status === 404) {
-            throw new Error('Repository not found');
+            const notFoundError = new Error('Repository not found');
+            notFoundError.status = 404;
+            notFoundError.clientMessage = 'Repository not found';
+            throw notFoundError;
         }
         if (err.response && err.response.status === 403) {
-            throw new Error('API rate limit exceeded');
+            const rateLimitError = new Error('API rate limit exceeded');
+            rateLimitError.status = 403;
+            rateLimitError.clientMessage = 'API rate limit exceeded';
+            throw rateLimitError;
         }
         throw err;
     }
 }
 
-export async function fetchManifest(owner, repo, filePath) {
-    //   const res = await githubClient.get(
-    //     `/repos/${owner}/${repo}/contents/${filePath}`
-    //   );
-    return cachedFetch(`gh:manifest:${owner}/${repo}/${filePath}`,
-        () => githubClient.get(`/repos/${owner}/${repo}/contents/${filePath}`),
-        3600); // MUST be file object
-}
+const fetchRepoMeta = async (owner, repo) => {
+        const res = await githubClient.get(`/repos/${owner}/${repo}`);
+        return res.data;
+};
 
-export async function fetchFolderContents(owner, repo, path) {
-    //   const res = await githubClient.get(
-    //     `/repos/${owner}/${repo}/contents/${path}`
-    //   );
-    return cachedFetch(`gh:folder:${owner}/${repo}/${path}`,
-        () => githubClient.get(`/repos/${owner}/${repo}/contents/${path}`),
-        3600); // array
-}
+const fetchRepoLanguages = async (owner, repo) => {
+        const res = await githubClient.get(`/repos/${owner}/${repo}/languages`);
+        return res.data;
+};
 
+const fetchRepoStructure = async (owner, repo) => {
+    console.log("Fetching repository structure for:", owner, repo);
+    const res = await githubClient.get(`/repos/${owner}/${repo}/git/trees/HEAD?recursive=1`);
+    return res.data.tree;
+};
+const fetchContent = async(owner, repo, path='') => {
+    const url = path ? `repos/${owner}/${repo}/contents/${path}` : `repos/${owner}/${repo}/contents`;
+    return githubClient.get(url);
+};
 
-async function fatchRepoMeta(owner, repo) {
-    return cachedFetch(`gh:meta:${owner}/${repo}`,
-        () => githubClient.get(`repos/${owner}/${repo}`),
-        3600); // MUST be repo object
-}
+const fetchImportantFiles = async (structure) => {
+    const importantFiles = structure.filter( item => IMPORTANT_FILES.includes(item.path.split('/').pop()));
+    
+    return importantFiles;
+};
 
-async function fatchRepoLanguages(owner, repo) {
-    return cachedFetch(`gh:languages:${owner}/${repo}`,
-        () => githubClient.get(`repos/${owner}/${repo}/languages`),
-        3600); // MUST be languages object
-}
+export async function fetchManifests(importantFiles, repoMeta) {
+        const files = [];
+        const manifestFiles = importantFiles.filter(item => MANIFEST_FILES.includes(item.path.split('/').pop()));
 
-async function fatchRepoContents(owner, repo) {
-    return cachedFetch(`gh:contents:${owner}/${repo}`,
-        () => githubClient.get(`repos/${owner}/${repo}/contents`),
-        3600); // array
-}
-
-async function fetchImpotentFiles(owner, repo, contents) {
-    const files = {};
-
-    for (const item of contents) {
-        if (IMPORTANT_FILES.includes(item.name)) {
-            const res = cachedFetch(`gh:file:${owner}/${repo}/${item.path}`,
-                () => githubClient.get(`/repos/${owner}/${repo}/contents/${item.path}`),
-                3600); // MUST be file object
-            files[item.name] = res.data;
+        for (const item of manifestFiles) {
+            const contentRes = await githubClient.get(`repos/${repoMeta.owner.login}/${repoMeta.name}/contents/${item.path}`);
+            
+            files.push(contentRes.data);
         }
-    }
-
-    return files;
+        return files;
 }
-

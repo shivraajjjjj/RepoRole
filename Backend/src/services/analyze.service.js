@@ -1,4 +1,4 @@
-import { fetchRepoData,fetchManifest,fetchFolderContents } from "./github.service.js";
+import { fetchRepoData,fetchManifests} from "./github.service.js";
 import { extractSignals } from "./signal.service.js";
 import { MANIFEST_FILES } from "./scanner.service.js";
 import { scoreRepository } from "../engines/scoring.engine.js";
@@ -17,9 +17,7 @@ export async function analyzeRepository(repoUrl) {
   frameworks: new Set(),
   databases: new Set(),
   buildFiles: new Set(),
-  structure: repoData.contents
-    .filter(c => c.type === "dir")
-    .map(c => c.name),
+  structure: repoData.structure.filter(item => item.type === 'tree').map(item => item.path),
   flags: new Set(),
   roles: [],
   metadata: {
@@ -29,99 +27,22 @@ export async function analyzeRepository(repoUrl) {
     supported: true
   }
 };
-    const isMonorepo = await detectMonorepo(repoData);
+const manifests = await fetchManifests(repoData.files, repoData.meta);
 
-    if (isMonorepo) {
-    return {
-        supported: false,
-        metadata: { isMonorepo: true },
-        message: "Monorepos are not supported in V1"
-    };
-    }
+extractSignals(manifests, projectSignals);
 
-    const manifests = [];
+// Convert Set collections to arrays for downstream processing
+projectSignals.runtime = [...projectSignals.runtime];
+projectSignals.frameworks = [...projectSignals.frameworks];
+projectSignals.databases = [...projectSignals.databases];
+projectSignals.buildFiles = [...projectSignals.buildFiles];
+projectSignals.flags = [...projectSignals.flags];
 
-    // root
-    for (const file of repoData.contents) {
-    if (file.type === "file" && MANIFEST_FILES.includes(file.name)) {
-        manifests.push({ path: "/", manifestName: file.name });
-    }
-    }
+projectSignals.metadata.isToy = detectToyProject(projectSignals);
 
-    // top-level dirs
-    for (const dir of repoData.contents.filter(c => c.type === "dir")) {
-    const folderContents = await fetchFolderContents(
-        repoData.meta.owner.login,
-        repoData.meta.name,
-        dir.name
-    );
+// scoring may be async; await to get final roles array
+projectSignals.roles = await scoreRepository(projectSignals);
 
-    for (const file of folderContents) {
-        if (file.type === "file" && MANIFEST_FILES.includes(file.name)) {
-        manifests.push({
-            path: `${dir.name}/`,
-            manifestName: file.name
-        });
-        }
-    }
-    }
-    
-    for (const manifest of manifests) {
-        const filePath =
-            manifest.path === "/"
-            ? manifest.manifestName
-            : `${manifest.path}${manifest.manifestName}`;
-
-        const file = await fetchManifest(
-            repoData.meta.owner.login,
-            repoData.meta.name,
-            filePath
-        );
-
-        extractSignals({
-            manifestName: manifest.manifestName,
-            content: file.content
-        }, projectSignals);
-        }
-
-    projectSignals.runtime = [...projectSignals.runtime];
-    projectSignals.frameworks = [...projectSignals.frameworks];
-    projectSignals.databases = [...projectSignals.databases];
-    projectSignals.buildFiles = [...projectSignals.buildFiles];
-    projectSignals.flags = [...projectSignals.flags];
-
-    const isToy = detectToyProject(projectSignals);
-    if (isToy) {
-        projectSignals.metadata.isToy = true;
-    }
-    // Compute roles (reuses scoring engine; currently re-fetches the repo)
-    projectSignals.roles = await scoreRepository(projectSignals);
-
-    return {
-      supported: true,
-      projectSignals
-    };
-}
-
-async function detectMonorepo(repoData) {
-  let manifestDirs = 0;
-
-  for (const item of repoData.contents) {
-    if (item.type !== "dir") continue;
-
-    const folderContents = await fetchFolderContents(
-      repoData.meta.owner.login,
-      repoData.meta.name,
-      item.name
-    );
-
-    const hasManifest = folderContents.some(
-      f => f.type === "file" && MANIFEST_FILES.includes(f.name)
-    );
-
-    if (hasManifest) manifestDirs++;
-    if (manifestDirs > 1) return true;
-  }
-
-  return false;
+ return projectSignals;
+ 
 }

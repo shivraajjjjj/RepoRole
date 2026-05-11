@@ -1,6 +1,6 @@
-# RepoSense - Repository to Role Analyzer
+# RepoRole - Repository to Role Analyzer
 
-RepoSense analyzes a GitHub repository and predicts suitable job and internship roles from real technical signals.
+RepoRole analyzes a GitHub repository and predicts suitable job and internship roles from real technical signals.
 
 No resumes.
 No forms.
@@ -25,6 +25,8 @@ Just code → roles.
 - Confidence scoring with toy project and weak-structure effects
 - Monorepo detection for V1 safety checks
 - Redis-based caching for GitHub API calls
+
+Notes on caching: Redis is now optional — the backend will fall back to direct API calls or in-memory behavior when Redis is unavailable. Using Redis improves performance and reduces GitHub rate-limit usage but is not required for local development.
 
 ## Tech Stack
 
@@ -198,8 +200,8 @@ Error response:
 ## Notes
 
 - Public GitHub repositories are supported in V1.
-- Monorepos with multiple manifest directories are not supported in V1.
-- Redis is required for cache-backed API calls.
+- Monorepos: supported but handled with safety checks and warnings (monorepo analyses may return more conservative results).
+- Redis: optional. The backend will continue to operate without Redis, but caching and API rate mitigation are reduced.
 
 ## License
 
