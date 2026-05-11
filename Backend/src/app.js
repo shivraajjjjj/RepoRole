@@ -6,14 +6,8 @@ const app = express();
 import algoRoutes from './routes/analyze.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
-const allowlist = (process.env.CORS_ORIGIN || '')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-app.use(cors({
-    origin: allowlist.length > 0 ? allowlist : (process.env.NODE_ENV === 'production' ? false : '*'),
-}
+app.use(cors(
+    '*'
 ));
 app.use(express.json());
 
