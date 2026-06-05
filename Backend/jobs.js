@@ -3,306 +3,91 @@ const jobs = [
   id: 1,
   title: "Backend JavaScript Developer (Entry-Level)",
 
-  primaryLanguages: ["JavaScript", "TypeScript"],
+  version: 1,
 
-  runtime: ["Node.js"],
+  signals: {
+    node_runtime: 20,
+    express_framework: 15,
+    database_usage: 15,
+    authentication: 10,
+    api_integration: 10,
+    project_structure: 10,
+    ci_cd: 5,
+    dockerization: 5
+  },
 
-  coreFrameworks: ["Express", "NestJS", "Fastify"],
-
-  optionalFrameworks: ["Koa", "Hapi", "AdonisJS", "Hono"],
-
-  structureSignals: [
-    "controllers/",
-    "services/",
-    "routes/",
-    "models/",
-    "middlewares/",
-  ],
-
-  databases: ["MongoDB", "PostgreSQL", "MySQL", "Redis"],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "tests/",
-    "__tests__/"
-  ]
+  penalties: {
+    tutorial_project: -20,
+    single_component_app: -10,
+    no_project_structure: -10
+  },
 },
 {
   id: 2,
   title: "Full Stack JavaScript Developer (Entry-Level)",
 
-  // Programming languages only
-  primaryLanguages: ["JavaScript", "TypeScript"],
+  version: 1,
 
-  // Markup / styling (secondary signals)
-  secondaryLanguages: ["HTML", "CSS"],
-
-  runtime: ["Node.js"],
-
-  // Backend frameworks
-  backendFrameworks: ["Express", "NestJS", "Fastify"],
-
-  // Frontend frameworks
-  frontendFrameworks: ["React", "Vue", "Angular"],
-
-  // Meta / optional frameworks
-  optionalFrameworks: ["Next.js", "Nuxt.js", "SvelteKit"],
-
-  // Combined structure signals (backend + frontend)
-  structureSignals: [
+  signals: {
     // Backend
-    "controllers/",
-    "services/",
-    "routes/",
-    "models/",
-    "middlewares/",
-    "config/",
+    node_runtime: 15,
+    express_framework: 10,
+    database_usage: 10,
 
     // Frontend
-    "components/",
-    "pages/",
-    "hooks/",
-    "styles/",
-    "assets/"
-  ],
+    react_framework: 15,
+    component_architecture: 10,
+    react_hooks: 10,
 
-  databases: ["MongoDB", "PostgreSQL", "MySQL", "Redis"],
+    // Full Stack
+    api_integration: 10,
+    project_structure: 10,
 
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "tests/",
-    "__tests__/"
-  ]
+    // Professional Practices
+    ci_cd: 5,
+    dockerization: 5
+  },
+
+  penalties: {
+    tutorial_project: -20,
+    single_component_app: -10,
+    no_project_structure: -10
+  },
 },
 {
-  id: 3,
-  title: "Backend Java Developer (Entry-Level)",
-
-  primaryLanguages: ["Java"],
-
-  runtime: ["JVM"],
-
-  coreFrameworks: ["Spring Boot", "Micronaut", "Quarkus"],
-
-  optionalFrameworks: ["Jakarta EE", "Vert.x"],
-
-  structureSignals: [
-    "controller/",
-    "controllers/",
-    "service/",
-    "services/",
-    "repository/",
-    "repositories/",
-    "config/",
-    "security/",
-    "filter/",
-    "filters/"
-  ],
-
-  buildSignals: [
-    "pom.xml",
-    "build.gradle",
-    "build.gradle.kts"
-  ],
-
-  databases: ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "src/test/java"
-  ]
-},
-{
-  id: 4,
-  title: "Full Stack Java Developer (Entry-Level)",
-
-  primaryLanguages: ["Java"],
-  secondaryLanguages: ["JavaScript", "TypeScript", "HTML", "CSS"],
-
-  runtime: ["JVM"],
-
-  backendFrameworks: ["Spring Boot", "Micronaut", "Quarkus"],
-  frontendFrameworks: ["React", "Angular", "Vue"],
-
-  structureSignals: [
-    // Backend
-    "controller/",
-    "controllers/",
-    "service/",
-    "services/",
-    "repository/",
-    "repositories/",
-    "config/",
-    "security/",
-
-    // Frontend
-    "components/",
-    "pages/",
-    "src/app/",
-    "styles/",
-    "assets/"
-  ],
-
-  buildSignals: [
-    "pom.xml",
-    "build.gradle",
-    "build.gradle.kts"
-  ],
-
-  databases: ["PostgreSQL", "MySQL", "MongoDB"],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "src/test/java"
-  ]
-},
-{
-  id: 5,
-  title: "Backend Python Developer (Entry-Level)",
-
-  primaryLanguages: ["Python"],
-
-  backendFrameworks: ["Django", "Flask", "FastAPI"],
-
-  optionalFrameworks: ["Sanic", "Bottle"],
-
-  structureSignals: [
-    "views/",
-    "routers/",
-    "api/",
-    "services/",
-    "models/",
-    "schemas/",
-    "config/"
-  ],
-
-  dependencySignals: [
-    "requirements.txt",
-    "pyproject.toml",
-    "Pipfile"
-  ],
-
-  databases: ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "tests/"
-  ]
-},
-{
-  id: 6,
+  id:3,
   title: "Frontend React Developer (Entry-Level)",
 
-  primaryLanguages: ["JavaScript", "TypeScript"],
-  secondaryLanguages: ["HTML", "CSS"],
+  version: 1,
 
-  frontendFrameworks: ["React"],
+  signals: {
+    // Core Frontend
+    react_framework: 15,
+    component_architecture: 15,
+    react_hooks: 15,
 
-  optionalFrameworks: ["Next.js", "Vite"],
+    // Application Structure
+    frontend_routing: 10,
+    state_management: 10,
 
-  structureSignals: [
-    "components/",
-    "pages/",
-    "hooks/",
-    "contexts/",
-    "styles/",
-    "assets/"
-  ],
+    // Engineering Practices
+    asynchronous_operations: 5,
+    environment_variables: 3,
+    testing: 7,
 
-  toolingSignals: [
-    "package.json",
-    "vite.config.js",
-    "webpack.config.js"
-  ],
+    // Professional Practices
+    ci_cd: 3,
+    dockerization: 2
+  },
 
-  infraSignals: [
-    ".github/workflows",
-    "tests/",
-    "__tests__/"
-  ]
-},
-{
-  id: 7,
-  title: "Machine Learning Engineer / Intern",
+  penalties: {
+    tutorial_project: -20,
+    single_component_app: -10,
+    no_project_structure: -10
+  },
 
-  primaryLanguages: ["Python"],
-
-  secondaryLanguages: ["R"],
-
-  mlFrameworks: [
-    "scikit-learn",
-    "TensorFlow",
-    "PyTorch",
-    "Keras",
-    "XGBoost"
-  ],
-
-  dataProcessingTools: [
-    "Pandas",
-    "NumPy",
-    "Dask",
-    "Apache Spark"
-  ],
-
-  dependencySignals: [
-    "requirements.txt",
-    "environment.yml",
-    "pyproject.toml"
-  ],
-
-  structureSignals: [
-    "notebooks/",
-    "data/",
-    "datasets/",
-    "models/",
-    "scripts/",
-    "configs/"
-  ],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "tests/"
-  ]
-},
-{
-  id: 8,
-  title: "Software Engineer Intern",
-
-  primaryLanguages: [
-    "JavaScript",
-    "Python",
-    "Java",
-    "TypeScript"
-  ],
-
-  generalFrameworks: [
-    "Express",
-    "Spring Boot",
-    "React",
-    "Django",
-    "Flask"
-  ],
-
-  structureSignals: [
-    "src/",
-    "lib/",
-    "app/",
-    "packages/"
-  ],
-
-  infraSignals: [
-    "Dockerfile",
-    ".github/workflows",
-    "tests/"
-  ]
-},
-
+  minimumConfidence: 0.5
+}
 ]
 
-module.exports = jobs;
+export default jobs;

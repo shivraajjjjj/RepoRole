@@ -1,6 +1,8 @@
 import axios from 'axios';
+import parser from "@babel/parser";
+import traverse from "@babel/traverse";
+import fs from "fs";
 import { parseRepoUrl } from '../utils/parser.js';
-import {MANIFEST_FILES} from "./scanner.service.js";
 import { cachedFetch } from '../utils/cacheHelper.js';
 import '../config/env.js';
 
@@ -17,13 +19,18 @@ export const githubClient = axios.create({
     }
 });
 
-const IMPORTANT_FILES = [
+const MANIFEST_FILES = [
     "package.json",
     "requirements.txt",
     "pyproject.toml",
     "pom.xml",
     "build.gradle",
     "build.gradle.kts",
+    "CMakeLists.txt",
+];
+
+const IMPORTANT_FILES = [
+    ...MANIFEST_FILES,
     "Dockerfile",
     "README.md",
 ]
@@ -69,7 +76,6 @@ export async function fetchRepoData(repoUrl) {
         throw err;
     }
 }
-
 const fetchRepoMeta = async (owner, repo) => {
         const res = await githubClient.get(`/repos/${owner}/${repo}`);
         return res.data;
@@ -80,12 +86,11 @@ const fetchRepoLanguages = async (owner, repo) => {
         return res.data;
 };
 
-const fetchRepoStructure = async (owner, repo) => {
-    console.log("Fetching repository structure for:", owner, repo);
+export async function fetchRepoStructure(owner, repo) {
     const res = await githubClient.get(`/repos/${owner}/${repo}/git/trees/HEAD?recursive=1`);
     return res.data.tree;
-};
-const fetchContent = async(owner, repo, path='') => {
+}
+export const fetchContent = async(owner, repo, path='') => {
     const url = path ? `repos/${owner}/${repo}/contents/${path}` : `repos/${owner}/${repo}/contents`;
     return githubClient.get(url);
 };
