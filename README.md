@@ -37,6 +37,24 @@ Notes on caching: Redis is now optional — the backend will fall back to direct
 - Redis
 - dotenv
 
+**Backend Architecture (concise overview)**
+
+- Entry point: `src/server.js` — starts the HTTP server and loads `src/app.js`.
+- App wiring: `src/app.js` — registers middleware, routes, and the global error handler.
+- Route: `routes/analyze.routes.js` exposes POST `/analyze/your-roles` handled by `controllers/analyze.controller.js`.
+- Controller: validates `req.body.repo`, delegates to the orchestrator, and returns the assembled JSON response.
+- Orchestrator: `orchestrators/analyze.orchestrators.js` coordinates analysis, implements Redis caching and in-flight request deduplication, and keeps caching concerns out of the main business logic.
+- Services: business logic lives in `services/`:
+  - `github.service.js` — GitHub API wrappers (meta, languages, tree, manifests)
+  - `scanner.service.js` — selects files, decodes content, and produces Babel ASTs (`JSTSFiles`)
+  - `signal.service.js` — extracts fine-grained signals from ASTs and manifests
+  - `signal.normalizer.js` — maps detailed signals into role-oriented signals
+  - `analyze.service.js` — orchestrates signal extraction, normalization, and scoring to produce `projectSignals`
+- Scoring: `engines/scoring.engine.js` consumes normalized role signals and computes role confidences; role configs live under `roles/`.
+- Cache: `cache/redis.js` is optional; the orchestrator falls back to direct analysis when Redis is unavailable.
+
+Design rule: parsing, signal extraction, normalization, and scoring are separated — parsing code must not score, and scoring must not re-parse sources.
+
 ### Frontend
 
 - React 19

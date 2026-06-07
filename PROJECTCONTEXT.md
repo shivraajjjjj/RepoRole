@@ -7,31 +7,43 @@ Repo Role analyzes github repositories and provides developer roles (Backend Eng
 the goal is not detect framework.
 the goal is to provide engineering capabilities from implimentation evidence.
 
-##current architecture
+## Current architecture
 
-http://localhost:3000/analyze/your-roles(broken endpoint) -> analyze.routes.js -> analyze.controller.js -> scanner.service.js -> github.service.js
+API entrypoint:
+- POST /analyze/your-roles  (JSON body: { "repo": "owner/name" | "https://github.com/owner/name" })
 
-http://localhost:3000/analyze/cards -> analyze.routes.js -> scanner.service.js -> github.service.js
-|-> signal.service.js 
+Request flow (high-level):
+- routes/analyze.routes.js -> controllers/analyze.controller.findRoles -> orchestrators/analyze.orchestrators.analyzeRepo
+	-> services/analyze.service.analyzeRepository -> services/github.service (repo meta & manifests)
+	-> services/scanner.service (parse selected files / produce ASTs) -> services/signal.service.extractSignals
+	-> services/signal.normalizer.generalizeRoleSignals -> engines/scoring.engine.scoreRepository
+	-> (orchestrator) cache in cache/redis.js (optional) -> controller returns JSON
+
+Notes:
+- Redis caching and request deduplication live in orchestrators/analyze.orchestrators.js. Redis is optional — the code falls back to direct API calls when Redis is unavailable.
+- The controller expects `req.body.repo` and returns a projectSignals payload plus role scoring metadata. Errors are handled by middlewares/errorHandler.js.
 
 ## Current Progress
 
 Implemented:
-- Repository tree fetching
-- JS/TS file detection
-- Base64 content decoding
-- Babel AST parsing
-- Signal extraction framework
+- Repository metadata + tree fetching (`services/github.service.js`)
+- Important manifest detection and manifest content fetching
+- Base64 decoding and Babel AST parsing for selected files (`services/scanner.service.js`)
+- Signal extraction from ASTs and manifests (`services/signal.service.js`)
+- Signal normalization and role-mapping utilities (`services/signal.normalizer.js`)
+- Role scoring engine (v1) and role configuration files (`engines/scoring.engine.js`, `roles/`)
+- Redis-backed caching and request deduplication (`orchestrators/analyze.orchestrators.js`, `cache/redis.js`)
 
 In Progress:
-- Detector system redesign
-- Signal normalization
-- Evidence model
+- Detector refinements and additional heuristics in `signal.service.js`
+- Improvements to signal normalization and evidence modeling
 
-Not Started:
-- Scoring engine v2
-- Explainability engine
-- Benchmark dataset
+Planned / Not Started:
+- Scoring engine v2 (improved explainability and weighting controls)
+- Explainability/reporting engine
+- Benchmark dataset and evaluation harness
+
+---
 
 ---
 
