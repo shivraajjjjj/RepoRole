@@ -1,6 +1,5 @@
 import parser from "@babel/parser";
 import { fetchRepoStructure, fetchContent } from "./github.service.js";
-import { extractSignals } from "./signal.service.js";
 import { parseRepoUrl } from "../utils/parser.js";
 
 export const MANIFEST_FILES = [
@@ -115,7 +114,10 @@ export async function JSTSFiles(owner, repo, structure) {
     }
   }
 
-  return extractSignals(parsedFiles, structure);
+  return {
+    selectedFiles: selectedFiles.map(file => file.path),
+    parsedFiles
+  }
 }
 
 function createEmptyClassification() {

@@ -96,17 +96,7 @@ const STRUCTURE_DETECTORS = [
   createStructureDetector("docker-compose", "dockerization", "docker configuration","docker-compose.yml", path => path.endsWith("docker-compose.yml"))
 ];
 
-export function extractSignals(files, context) {
-  const entries = toArray(files);
-
-  if (entries.some(entry => entry?.ast)) {
-    return extractCodeSignals(entries, context);
-  }
-
-  return extractManifestSignals(entries, context);
-}
-
-function extractCodeSignals(parsedFiles, treeStructure = []) {
+export function extractCodeSignals(parsedFiles, treeStructure = []) {
   const signalMap = new Map();
 
   for (const entry of parsedFiles) {
@@ -151,7 +141,7 @@ function extractCodeSignals(parsedFiles, treeStructure = []) {
   return serializeSignalMap(signalMap);
 }
 
-function extractManifestSignals(manifests, projectSignals) {
+export function extractManifestSignals(manifests, projectSignals) {
   if (!projectSignals) return {};
 
   for (const manifest of manifests) {
@@ -285,6 +275,7 @@ function extractNodeSignals(item, projectSignals) {
   if (deps.pg) projectSignals.databases.add("PostgreSQL");
   if (deps.mysql2) projectSignals.databases.add("MySQL");
   if (deps.redis) projectSignals.databases.add("Redis");
+  if (deps.prisma) projectSignals.flags.add("Prisma");
 }
 
 function extractPythonSignals(item, projectSignals) {

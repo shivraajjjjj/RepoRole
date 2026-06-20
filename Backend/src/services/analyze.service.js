@@ -1,5 +1,5 @@
 import { fetchRepoData, fetchManifests } from "./github.service.js";
-import { extractSignals } from "./signal.service.js";
+import { extractCodeSignals,extractManifestSignals } from "./signal.service.js";
 import { scoreRepository } from "../engines/scoring.engine.js";
 import { detectToyProject } from "./toyDetector.js";
 import { JSTSFiles } from "./scanner.service.js";
@@ -10,14 +10,17 @@ export async function analyzeRepository(repoUrl) {
   const projectSignals = createProjectSignals(repoUrl, repoData);
   const manifests = await fetchManifests(repoData.files, repoData.meta);
 
-  extractSignals(manifests, projectSignals);
+  extractManifestSignals(manifests, projectSignals);
   convertSetsToArrays(projectSignals);
 
-  const detailedSignals = await JSTSFiles(
+  const {selectedFiles,parsedFiles} = await JSTSFiles(
     repoData.meta.owner.login,
     repoData.meta.name,
     repoData.structure
   );
+
+  const detailedSignals = extractCodeSignals(parsedFiles, repoData.structure);
+
   const { roleSignals, unmappedSignals } = generalizeRoleSignals(detailedSignals);
 
   projectSignals.metadata.isToy = detectToyProject(projectSignals);
@@ -27,7 +30,8 @@ export async function analyzeRepository(repoUrl) {
     ...projectSignals,
     roleSignals,
     detailedSignals,
-    unmappedSignals
+    unmappedSignals,
+    selectedFiles
   };
 }
 

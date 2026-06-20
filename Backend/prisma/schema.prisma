@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  RECRUITER
+  SEEKER
+  ADMIN
+}
+
+enum AuthProvider {
+  GITHUB
+  EMAIL
+}
+
+model User {
+  id    String   @id @default(uuid())
+  githubId  String?   @unique
+  email     String?   @unique
+  name      String
+  role      UserRole @default(SEEKER)
+  avatarUrl String?
+
+  githubLogin String?  
+  provider  AuthProvider @default(GITHUB)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repositories Repository[]
+  analyses     Analysis[]
+
+  analyzedAt DateTime?
+}
+
+model EmailOtp {
+  id        String   @id @default(uuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@unique([email, otpHash])
+}
+
+model Repository {
+  id          String   @id @default(uuid())
+  githubRepoId  String   @unique
+  owner       String
+  name        String
+
+  description String?
+  language    String?
+
+  stars       Int      @default(0)
+  forks       Int      @default(0)
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([owner, name])
+  analyses     Analysis[]
+}
+
+model Analysis {
+  id          String   @id @default(uuid())
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+ 
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  
+  overallScore Float
+
+  result      Json
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}

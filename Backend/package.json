@@ -4,7 +4,7 @@
   "description": "The Backend directory contains all the server-side code and resources for the application. Below is an overview of its structure:",
   "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "dev": "npx tsx watch src/server.js "
   },
   "keywords": [],
@@ -14,11 +14,22 @@
   "dependencies": {
     "@babel/parser": "^7.29.7",
     "@babel/traverse": "^7.29.7",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^9.0.1",
     "nodemon": "^3.1.11",
     "redis": "^5.11.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0",
+    "vitest": "^4.1.9",
+    "supertest": "^6.3.3"
   }
 }

@@ -11,7 +11,7 @@ export const findRoles = async (req, res, next) => {
       throw err;
     }
 
-    if(redis.isReady) {
+    if(redis.isReady()) {
       const result = await analyzeRepo(repo);
       res.json(result);
     } else {

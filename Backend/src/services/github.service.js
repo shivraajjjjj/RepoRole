@@ -1,9 +1,5 @@
 import axios from 'axios';
-import parser from "@babel/parser";
-import traverse from "@babel/traverse";
-import fs from "fs";
 import { parseRepoUrl } from '../utils/parser.js';
-import { cachedFetch } from '../utils/cacheHelper.js';
 import '../config/env.js';
 
 const _rawBase = process.env.GITHUB_API_BASE_URL ?? '';
