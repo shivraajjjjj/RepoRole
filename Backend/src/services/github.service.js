@@ -72,6 +72,15 @@ export async function fetchRepoData(repoUrl) {
         throw err;
     }
 }
+export async function getAllRepos(owner,accesstoken){
+    const res = await githubClient.get(`/users/${owner}/repos`, {
+        headers: {
+            Authorization: `Bearer ${accesstoken}`
+        }
+    });
+    return res.data;
+}
+
 const fetchRepoMeta = async (owner, repo) => {
         const res = await githubClient.get(`/repos/${owner}/${repo}`);
         return res.data;

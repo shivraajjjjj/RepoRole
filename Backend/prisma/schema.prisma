@@ -60,9 +60,10 @@ model Repository {
   githubRepoId  String   @unique
   owner       String
   name        String
-
+  url         String
   description String?
   language    String?
+
 
   stars       Int      @default(0)
   forks       Int      @default(0)

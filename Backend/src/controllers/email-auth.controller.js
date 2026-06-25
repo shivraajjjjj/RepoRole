@@ -47,7 +47,8 @@ export async function sendRecruiterOtp(req, res) {
                 message: 'Email is required',
             });
         }
-
+        
+        //check if recruiter already exist 
         const user = await prisma.user.findUnique({
             where: { email },
         });

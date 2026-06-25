@@ -2,7 +2,7 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import prisma from '../config/prisma.js';
-
+import {getAllRepos} from '../services/github.service.js'
 const DEFAULT_SIGNUP_ROLE = 'SEEKER';
 const PUBLIC_SIGNUP_ROLES = new Set(['SEEKER', 'RECRUITER']);
 
@@ -61,7 +61,7 @@ export const githubAuth = async (req, res) => {
             });
         }
 
-        const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=read:user`
+        const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=read:user user:email repo`
         res.redirect(url)
     } catch (error) {
         console.error("Error during GitHub authentication:", error)
@@ -115,7 +115,7 @@ export const githubAuthCallback = async (req, res) => {
         })
 
         const githubUser = userResponse.data
-
+        const repos = await getAllRepos(githubUser.login, accessToken);
         //check if user exists in database
         let user = await prisma.user.findUnique({
             where: {
@@ -133,6 +133,31 @@ export const githubAuthCallback = async (req, res) => {
                     role: 'SEEKER',
                     provider: "GITHUB"
                 }
+            })
+        }
+
+        // check if repository data exists for the user, if not create it
+        let repoData = await prisma.repository.findFirst({
+            where: {
+                userId: user.id
+            }
+        })
+
+        let repoDataToCreate = repos.map(repo => ({
+            githubRepoId: repo.id.toString(),
+            owner: repo.owner.login,
+            name: repo.name,
+            description: repo.description,
+            language: repo.language,
+            stars: repo.stargazers_count,
+            forks: repo.forks_count,
+            userId: user.id,
+        }));
+
+        if (!repoData) {
+            await prisma.repository.createMany({
+                data: repoDataToCreate,
+                skipDuplicates: true
             })
         }
 
@@ -182,10 +207,14 @@ export const getMe = async (req, res) => {
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
         });
+        const repos = await prisma.repository.findMany({
+            where: {userId: req.user.id}
+        })
 
         return res.status(200).json({
             success: true,
             user,
+            repos
         });
     } catch (error) {
         return res.status(500).json({
