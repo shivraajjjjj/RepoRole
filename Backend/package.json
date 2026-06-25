@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "build": "prisma generate",
-    "start": "node src",
+    "start": "node src/server.js",
     "test": "vitest",
     "dev": "npx tsx watch src/server.js "
   },
