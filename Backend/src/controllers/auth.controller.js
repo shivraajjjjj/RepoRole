@@ -53,15 +53,18 @@ function setAuthCookie(res, token) {
 
 
 export const githubAuth = async (req, res) => {
+        
+    const frontendUrl = req.query.frontendUrl || process.env.FRONTEND_URL;
+    const state = jwt.sign({ frontendUrl }, getJwtSecret(),{ expiresIn: '10m' });
     try {
         if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_REDIRECT_URI) {
             return res.status(500).json({
-                message: 'GitHub OAuth is not configured',
+                message: `GitHub OAuth is not configured for redirect URI: ${process.env.GITHUB_REDIRECT_URI}`,
                 success: false,
             });
         }
 
-        const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=read:user user:email repo`
+        const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&state=${state}&scope=read:user user:email repo`
         res.redirect(url)
     } catch (error) {
         console.error("Error during GitHub authentication:", error)
@@ -75,7 +78,7 @@ export const githubAuth = async (req, res) => {
 
 export const githubAuthCallback = async (req, res) => {
     try {
-        const { code, state } = req.query;
+        const {code, state} = req.query;
         if (!code) {
             return res.status(400).json({ message: "Code not provided by GitHub", success: false })
         }
@@ -147,6 +150,7 @@ export const githubAuthCallback = async (req, res) => {
             githubRepoId: repo.id.toString(),
             owner: repo.owner.login,
             name: repo.name,
+            url: repo.html_url,
             description: repo.description,
             language: repo.language,
             stars: repo.stargazers_count,
@@ -168,9 +172,10 @@ export const githubAuthCallback = async (req, res) => {
         )
 
         setAuthCookie(res, token)
-
-        if (process.env.FRONTEND_URL) {
-            return res.redirect(`${process.env.FRONTEND_URL}`)
+        const decodedState = jwt.verify(state, getJwtSecret());
+        const frontendUrl = decodedState?.frontendUrl || process.env.FRONTEND_URL;
+        if (frontendUrl) {
+            return res.redirect(`${frontendUrl}`)
         }
 
         return res.status(200).json({
